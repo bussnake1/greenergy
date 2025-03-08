@@ -1,0 +1,33 @@
+# Frontend configuration for NX Template Project
+# This file is used for GitHub auto-deployment with Dokploy
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: ./apps/template-app/template-frontend/Dockerfile
+    container_name: nx-template-frontend
+    restart: always
+    environment:
+      # These environment variables should be configured in Dokploy admin
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
+      - NUXT_API_BASE_URL=https://${BACKEND_DOMAIN:-http://localhost:3333}/api
+      # Ensure the frontend can find the backend service if needed
+    networks:
+      - dokploy-network
+    # External dependency - assumes backend service is already running
+    # No direct depends_on since services are deployed separately
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${FRONTEND_DOMAIN:-example.com}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "dokploy.deploy.order=3"  # Deploy frontend last
+
+networks:
+  dokploy-network:
+    external: true  # This network will be created by Dokploy

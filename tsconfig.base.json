@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
+    "composite": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": false,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": false,
+    "experimentalDecorators": true,
+    "lib": ["es2021", "dom"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strictPropertyInitialization": false,
+    "strict": true,
+    "target": "es2021",
+    "paths": {
+      "@nuxt/ui": ["node_modules/@nuxt/ui"],
+      "@nuxt/ui/*": ["node_modules/@nuxt/ui/*"],
+      "@nx-template/auth-client": ["libs/shared-client/auth-client/src"],
+      "@nx-template/auth-client/*": ["libs/shared-client/auth-client/src/*"],
+      "@nx-template/shared-ui": ["libs/shared-client/shared-ui/src"],
+      "@nx-template/shared-ui/*": ["libs/shared-client/shared-ui/src/*"],
+      "shared-client/api-key-client": ["libs/shared-client/api-key-client/src"],
+      "shared-client/api-key-client/*": [
+        "libs/shared-client/api-key-client/src/*"
+      ],
+      "shared-client/auth-client": ["libs/shared-client/auth-client/src"],
+      "shared-client/auth-client/*": ["libs/shared-client/auth-client/src/*"],
+      "shared/api-key": ["libs/shared/api-key/src"],
+      "shared/api-key/*": ["libs/shared/api-key/src/*"],
+      "shared/auth": ["libs/shared/auth/src"],
+      "shared/auth/*": ["libs/shared/auth/src/*"]
+    }
+  }
+}

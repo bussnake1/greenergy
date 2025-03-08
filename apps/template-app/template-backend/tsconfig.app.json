@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "../../../dist/out-tsc",
+    "module": "commonjs",
+    "types": ["node"],
+    "emitDecoratorMetadata": true,
+    "target": "es2021"
+  },
+  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
+  "include": ["**/*.ts", "../../../libs/shared/*/src/**/*"],
+  "references": [
+    {
+      "path": "../../../libs/shared/api-key/tsconfig.lib.json"
+    }
+  ]
+}

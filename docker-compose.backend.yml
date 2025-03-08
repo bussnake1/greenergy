@@ -1,0 +1,36 @@
+# Backend configuration for NX Template Project
+# This file is used for GitHub auto-deployment with Dokploy
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./apps/template-app/template-backend/Dockerfile
+    container_name: nx-template-backend
+    restart: always
+    environment:
+      # These environment variables should be configured in Dokploy admin
+      - NODE_ENV=production
+      - PORT=3333
+      # - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@nx-template-postgres:5432/${POSTGRES_DB:-nx_template}?schema=public
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-1w}
+    networks:
+      - dokploy-network
+    # External dependency - assumes postgres service is already running
+    # No direct depends_on since services are deployed separately
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`${BACKEND_DOMAIN:-example.com}`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=3333"
+      - "traefik.http.middlewares.backend-strip.stripprefix.prefixes=/api"
+      - "traefik.http.routers.backend.middlewares=backend-strip@docker"
+      - "dokploy.deploy.order=2"  # Deploy backend after database
+
+networks:
+  dokploy-network:
+    external: true  # This network will be created by Dokploy

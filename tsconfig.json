@@ -1,0 +1,26 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/template-app/template-frontend-e2e"
+    },
+    {
+      "path": "./apps/template-app/template-frontend"
+    },
+    {
+      "path": "./apps/template-app/template-backend"
+    },
+    {
+      "path": "./libs/shared-client/auth-client"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "shared/auth": ["libs/shared/auth/src"],
+      "shared/auth/*": ["libs/shared/auth/src/*"]
+    }
+  }
+}

@@ -1,0 +1,60 @@
+# Stage 1: Build the application
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+COPY nx.json ./
+COPY tsconfig*.json ./
+
+# Copy the entire monorepo
+COPY apps/template-app/template-backend ./apps/template-app/template-backend
+COPY libs ./libs
+
+# Install dependencies
+RUN npm ci
+
+# Sync NX workspace to ensure TypeScript project references are correct
+RUN npx nx sync
+
+# Set environment variables for NX build
+ENV NX_DAEMON=false
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Build the application
+RUN npx nx build template-backend --prod
+
+# Stage 2: Run the application
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production
+
+# Install Prisma client explicitly
+RUN npm install @prisma/client
+
+# Copy Prisma schema for migrations
+COPY --from=builder /app/apps/template-app/template-backend/prisma ./prisma
+
+# Copy the built application
+COPY --from=builder /app/dist/apps/template-app/template-backend ./dist
+
+# Copy startup script
+COPY --from=builder /app/apps/template-app/template-backend/start.sh ./start.sh
+RUN chmod +x ./start.sh
+
+# Expose the port
+EXPOSE 3333
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3333
+
+# Run the startup script which will run migrations and then start the application
+CMD ["./start.sh"]

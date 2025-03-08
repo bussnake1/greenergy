@@ -1,0 +1,28 @@
+# Database configuration for NX Template Project
+# This file is used for GitHub auto-deployment with Dokploy
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: nx-template-postgres
+    restart: always
+    environment:
+      # These environment variables should be configured in Dokploy admin
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-nx_template}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=false"  # Database should not be exposed via Traefik
+      - "dokploy.deploy.order=1"  # Deploy database first
+
+networks:
+  dokploy-network:
+    external: true  # This network will be created by Dokploy
+
+volumes:
+  postgres_data:
+    name: nx-template-postgres-data

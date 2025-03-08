@@ -1,0 +1,6 @@
+{
+  "name": "api-key",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/api-key/src",
+  "projectType": "library"
+}

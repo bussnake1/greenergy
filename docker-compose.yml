@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: nx-template-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nx_template
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nx-template-network
+
+networks:
+  nx-template-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
