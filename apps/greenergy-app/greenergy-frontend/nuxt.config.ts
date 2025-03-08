@@ -7,7 +7,7 @@ import { createGlobPatternsForDependencies } from '@nx/vue/tailwind';
 export default defineNuxtConfig({
   workspaceDir: '../../../',
   srcDir: 'src',
-  buildDir: '../../../dist/apps/template-app/template-frontend/.nuxt',
+  buildDir: '../../../dist/apps/greenergy-app/greenergy-frontend/.nuxt',
   devtools: { enabled: true },
   modules: ['@nuxt/ui'],
   colorMode: {
@@ -54,8 +54,8 @@ export default defineNuxtConfig({
 
   nitro: {
     output: {
-      publicDir: '../../../dist/apps/template-app/template-frontend/.output/public',
-      serverDir: '../../../dist/apps/template-app/template-frontend/.output/server',
+      publicDir: '../../../dist/apps/greenergy-app/greenergy-frontend/.output/public',
+      serverDir: '../../../dist/apps/greenergy-app/greenergy-frontend/.output/server',
     }
   },
 

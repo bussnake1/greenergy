@@ -16,7 +16,7 @@ async function bootstrap() {
 
   // Enable CORS for frontend
   app.enableCors({
-    origin: ['http://localhost:4200', 'https://nx-template-frontend.bussnake.hu'],
+    origin: ['http://localhost:4200', 'https://greenergy-frontend.bussnake.hu'],
     credentials: true,
   });
 
@@ -25,7 +25,7 @@ async function bootstrap() {
 
   // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('Nest template app')
+    .setTitle('Nest Greenergy app')
     .setDescription('The API description')
     .setVersion('1.0')
     .addTag('cats')

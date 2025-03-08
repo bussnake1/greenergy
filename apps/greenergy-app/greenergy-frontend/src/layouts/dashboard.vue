@@ -19,8 +19,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { DashboardLayout } from '@nx-template/shared-ui';
-import { useAuth } from '@nx-template/auth-client';
+import { DashboardLayout } from '@greenergy/shared-ui';
+import { useAuth } from '@greenergy/auth-client';
 
 const { user: authUser, logout } = useAuth();
 

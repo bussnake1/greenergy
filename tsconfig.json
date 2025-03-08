@@ -4,13 +4,13 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/template-app/template-frontend-e2e"
+      "path": "./apps/greenergy-app/greenergy-frontend-e2e"
     },
     {
-      "path": "./apps/template-app/template-frontend"
+      "path": "./apps/greenergy-app/greenergy-frontend"
     },
     {
-      "path": "./apps/template-app/template-backend"
+      "path": "./apps/greenergy-app/greenergy-backend"
     },
     {
       "path": "./libs/shared-client/auth-client"

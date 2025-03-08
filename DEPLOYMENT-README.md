@@ -1,6 +1,6 @@
-# NX Template Project Deployment
+# NX Greenergy Project Deployment
 
-This document provides a quick overview of the deployment configuration for the NX Template project using GitHub auto-deployment with Dokploy.
+This document provides a quick overview of the deployment configuration for the NX Greenergy project using GitHub auto-deployment with Dokploy.
 
 ## Deployment Files
 
@@ -44,16 +44,16 @@ The project is configured for GitHub auto-deployment:
 
 The services use specific container names to ensure proper communication:
 
-- **Database**: `nx-template-postgres`
-- **Backend**: `nx-template-backend`
-- **Frontend**: `nx-template-frontend`
+- **Database**: `greenergy-postgres`
+- **Backend**: `greenergy-backend`
+- **Frontend**: `greenergy-frontend`
 
 All services connect to the `dokploy-network` external network created by Dokploy. This network allows services to communicate with each other using container names.
 
 **Important**: The backend service connects to the database using the container name in the DATABASE_URL environment variable. The correct format is:
 
 ```
-postgresql://postgres:postgres@nx-template-postgres:5432/nx_template?schema=public
+postgresql://postgres:postgres@greenergy-postgres:5432/greenergy_db?schema=public
 ```
 
 ## Domain Configuration

@@ -9,7 +9,7 @@ COPY nx.json ./
 COPY tsconfig*.json ./
 
 # Copy the entire monorepo
-COPY apps/template-app/template-backend ./apps/template-app/template-backend
+COPY apps/greenergy-app/greenergy-backend ./apps/greenergy-app/greenergy-backend
 COPY libs ./libs
 
 # Install dependencies
@@ -23,7 +23,7 @@ ENV NX_DAEMON=false
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 # Build the application
-RUN npx nx build template-backend --prod
+RUN npx nx build greenergy-backend --prod
 
 # Stage 2: Run the application
 FROM node:20-alpine
@@ -40,13 +40,13 @@ RUN npm ci --only=production
 RUN npm install @prisma/client
 
 # Copy Prisma schema for migrations
-COPY --from=builder /app/apps/template-app/template-backend/prisma ./prisma
+COPY --from=builder /app/apps/greenergy-app/greenergy-backend/prisma ./prisma
 
 # Copy the built application
-COPY --from=builder /app/dist/apps/template-app/template-backend ./dist
+COPY --from=builder /app/dist/apps/greenergy-app/greenergy-backend ./dist
 
 # Copy startup script
-COPY --from=builder /app/apps/template-app/template-backend/start.sh ./start.sh
+COPY --from=builder /app/apps/greenergy-app/greenergy-backend/start.sh ./start.sh
 RUN chmod +x ./start.sh
 
 # Expose the port

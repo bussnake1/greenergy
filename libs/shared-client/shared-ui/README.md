@@ -17,7 +17,7 @@ Import components from the library:
 
 ```vue
 <script setup>
-import { Aside, DashboardLayout } from '@nx-template/shared-ui';
+import { Aside, DashboardLayout } from '@greenergy/shared-ui';
 </script>
 
 <template>

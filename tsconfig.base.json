@@ -26,10 +26,10 @@
     "paths": {
       "@nuxt/ui": ["node_modules/@nuxt/ui"],
       "@nuxt/ui/*": ["node_modules/@nuxt/ui/*"],
-      "@nx-template/auth-client": ["libs/shared-client/auth-client/src"],
-      "@nx-template/auth-client/*": ["libs/shared-client/auth-client/src/*"],
-      "@nx-template/shared-ui": ["libs/shared-client/shared-ui/src"],
-      "@nx-template/shared-ui/*": ["libs/shared-client/shared-ui/src/*"],
+      "@greenergy/auth-client": ["libs/shared-client/auth-client/src"],
+      "@greenergy/auth-client/*": ["libs/shared-client/auth-client/src/*"],
+      "@greenergy/shared-ui": ["libs/shared-client/shared-ui/src"],
+      "@greenergy/shared-ui/*": ["libs/shared-client/shared-ui/src/*"],
       "shared-client/api-key-client": ["libs/shared-client/api-key-client/src"],
       "shared-client/api-key-client/*": [
         "libs/shared-client/api-key-client/src/*"

@@ -2,7 +2,7 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "outDir": "out-tsc/template-frontend",
+    "outDir": "out-tsc/greenergy-frontend",
     // "rootDir": "src",
     "jsx": "preserve",
     "jsxImportSource": "vue",
@@ -10,10 +10,10 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "tsBuildInfoFile": "out-tsc/template-frontend/tsconfig.app.tsbuildinfo"
+    "tsBuildInfoFile": "out-tsc/greenergy-frontend/tsconfig.app.tsbuildinfo"
   },
   "include": [
-    "../../../dist/apps/template-app/template-frontend/.nuxt/nuxt.d.ts",
+    "../../../dist/apps/greenergy-app/greenergy-frontend/.nuxt/nuxt.d.ts",
     "src/**/*",
     "../../../libs/shared-client/*/src/**/*"
   ],

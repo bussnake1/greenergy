@@ -9,7 +9,7 @@ COPY nx.json ./
 COPY tsconfig*.json ./
 
 # Copy the entire monorepo
-COPY apps/template-app/template-frontend ./apps/template-app/template-frontend
+COPY apps/greenergy-app/greenergy-frontend ./apps/greenergy-app/greenergy-frontend
 COPY libs ./libs
 
 # Install dependencies
@@ -23,10 +23,10 @@ ENV NX_DAEMON=false
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 # Build the application
-RUN npx nx build template-frontend --prod
+RUN npx nx build greenergy-frontend --prod
 
 # Debug: List the build output to see the structure
-RUN ls -la /app/dist/apps/template-app/template-frontend
+RUN ls -la /app/dist/apps/greenergy-app/greenergy-frontend
 
 # Stage 2: Run the application
 FROM node:20-alpine
@@ -34,7 +34,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy the built application - Nuxt 3 output is in the .output directory
-COPY --from=builder /app/dist/apps/template-app/template-frontend/.output ./
+COPY --from=builder /app/dist/apps/greenergy-app/greenergy-frontend/.output ./
 
 # Expose the port
 EXPOSE 3000

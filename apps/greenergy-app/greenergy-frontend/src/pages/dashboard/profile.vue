@@ -59,8 +59,8 @@
 
 <script setup lang="ts">
 import { reactive, computed } from 'vue';
-import { DashboardContent } from '@nx-template/shared-ui';
-import { useAuth } from '@nx-template/auth-client';
+import { DashboardContent } from '@greenergy/shared-ui';
+import { useAuth } from '@greenergy/auth-client';
 
 // Define layout
 definePageMeta({

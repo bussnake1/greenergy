@@ -1,5 +1,5 @@
 {
-  "name": "@nx-template/source",
+  "name": "@greenergy/source",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {},
@@ -57,7 +57,7 @@
   },
   "workspaces": [
     "libs/*",
-    "apps/template-app/*",
+    "apps/greenergy-app/*",
     "shared-client",
     "shared"
   ]

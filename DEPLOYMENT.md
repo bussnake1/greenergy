@@ -1,6 +1,6 @@
-# Deployment Guide for NX Template Project
+# Deployment Guide for NX Greenergy Project
 
-This guide explains how to deploy the NX Template project using Dokploy on Hetzner with GitHub auto-deployment.
+This guide explains how to deploy the NX Greenergy project using Dokploy on Hetzner with GitHub auto-deployment.
 
 ## Prerequisites
 
@@ -36,7 +36,7 @@ Instead of using a local .env file, configure the following environment variable
 ### Backend Variables
 
 - `PORT` - Backend port (typically 3333)
-- `DATABASE_URL` - PostgreSQL connection string (should be in the format: `postgresql://postgres:postgres@nx-template-postgres:5432/nx_template?schema=public`)
+- `DATABASE_URL` - PostgreSQL connection string (should be in the format: `postgresql://postgres:postgres@greenergy-postgres:5432/greenergy_db?schema=public`)
 - `JWT_SECRET` - Secret key for JWT token generation
 - `JWT_EXPIRES_IN` - JWT token expiration time
 
@@ -59,13 +59,13 @@ Instead of using a local .env file, configure the following environment variable
 
 The Docker Compose files use specific container names to ensure services can communicate with each other:
 
-- Database container: `nx-template-postgres`
-- Backend container: `nx-template-backend`
-- Frontend container: `nx-template-frontend`
+- Database container: `greenergy-postgres`
+- Backend container: `greenergy-backend`
+- Frontend container: `greenergy-frontend`
 
 All services connect to the `dokploy-network` external network, which is created by Dokploy. This network allows the services to communicate with each other using the container names.
 
-**Important**: The backend service connects to the database using the container name `nx-template-postgres` in the DATABASE_URL. Make sure this matches the container name in the database Docker Compose file.
+**Important**: The backend service connects to the database using the container name `greenergy-postgres` in the DATABASE_URL. Make sure this matches the container name in the database Docker Compose file.
 
 ## Deployment Process
 

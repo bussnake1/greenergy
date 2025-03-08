@@ -161,7 +161,7 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
-import { DashboardContent } from '@nx-template/shared-ui';
+import { DashboardContent } from '@greenergy/shared-ui';
 
 // Define layout
 definePageMeta({

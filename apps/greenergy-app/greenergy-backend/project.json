@@ -1,17 +1,17 @@
 {
-  "name": "template-backend",
+  "name": "greenergy-backend",
   "version": "0.0.1",
   "private": true,
   "nx": {
-    "name": "template-backend",
+    "name": "greenergy-backend",
     "projectType": "application",
-    "sourceRoot": "apps/template-app/template-backend/src",
+    "sourceRoot": "apps/greenergy-app/greenergy-backend/src",
     "targets": {
       "build": {
         "executor": "nx:run-commands",
         "options": {
           "command": "webpack-cli build",
-          "cwd": "apps/template-app/template-backend",
+          "cwd": "apps/greenergy-app/greenergy-backend",
           "args": [
             "node-env=production"
           ]
@@ -31,14 +31,14 @@
           "build"
         ],
         "options": {
-          "buildTarget": "template-backend:build"
+          "buildTarget": "greenergy-backend:build"
         },
         "configurations": {
           "development": {
-            "buildTarget": "template-backend:build:development"
+            "buildTarget": "greenergy-backend:build:development"
           },
           "production": {
-            "buildTarget": "template-backend:build:production"
+            "buildTarget": "greenergy-backend:build:production"
           }
         }
       },

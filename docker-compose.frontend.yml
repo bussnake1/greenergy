@@ -1,12 +1,12 @@
-# Frontend configuration for NX Template Project
+# Frontend configuration for NX Greenergy Project
 # This file is used for GitHub auto-deployment with Dokploy
 
 services:
   frontend:
     build:
       context: .
-      dockerfile: ./apps/template-app/template-frontend/Dockerfile
-    container_name: nx-template-frontend
+      dockerfile: ./apps/greenergy-app/greenergy-frontend/Dockerfile
+    container_name: greenergy-frontend
     restart: always
     environment:
       # These environment variables should be configured in Dokploy admin
@@ -26,8 +26,8 @@ services:
       - "traefik.http.routers.frontend.tls=true"
       - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
-      - "dokploy.deploy.order=3"  # Deploy frontend last
+      - "dokploy.deploy.order=3" # Deploy frontend last
 
 networks:
   dokploy-network:
-    external: true  # This network will be created by Dokploy
+    external: true # This network will be created by Dokploy

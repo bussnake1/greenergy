@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { ApiKeyList } from 'shared-client/api-key-client';
-import { DashboardContent } from '@nx-template/shared-ui';
+import { DashboardContent } from '@greenergy/shared-ui';
 
 definePageMeta({
   layout: 'dashboard',

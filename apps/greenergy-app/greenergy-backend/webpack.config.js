@@ -5,7 +5,7 @@ const { join } = require('path');
 
 module.exports = {
   output: {
-    path: join(__dirname, '../../../dist/apps/template-app/template-backend'),
+    path: join(__dirname, '../../../dist/apps/greenergy-app/greenergy-backend'),
   },
   resolve: {
     extensions: ['.ts', '.js'],
