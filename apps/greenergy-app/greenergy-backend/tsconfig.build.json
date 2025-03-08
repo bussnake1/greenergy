@@ -3,6 +3,9 @@
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"],
   "references": [
     {
+      "path": "../../../libs/shared/production-generation-units-unavailability/tsconfig.lib.json"
+    },
+    {
       "path": "../../../libs/shared/api-key/tsconfig.lib.json"
     }
   ]

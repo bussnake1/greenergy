@@ -1,0 +1,6 @@
+{
+  "name": "production-generation-units-unavailability",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/production-generation-units-unavailability/src",
+  "projectType": "library"
+}

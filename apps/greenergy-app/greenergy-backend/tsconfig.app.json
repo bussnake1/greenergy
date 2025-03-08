@@ -12,6 +12,9 @@
   "include": ["**/*.ts", "../../../libs/shared/*/src/**/*"],
   "references": [
     {
+      "path": "../../../libs/shared/production-generation-units-unavailability/tsconfig.lib.json"
+    },
+    {
       "path": "../../../libs/shared/api-key/tsconfig.lib.json"
     }
   ]

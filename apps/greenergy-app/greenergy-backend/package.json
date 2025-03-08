@@ -42,6 +42,13 @@
           }
         }
       },
+      "seed": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "npx ts-node -r tsconfig-paths/register src/scripts/run-seeder.ts",
+          "cwd": "apps/greenergy-app/greenergy-backend"
+        }
+      },
       "test": {
         "options": {
           "passWithNoTests": true
