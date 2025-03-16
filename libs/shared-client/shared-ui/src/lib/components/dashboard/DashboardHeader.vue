@@ -1,21 +1,38 @@
 <template>
-  <header class="dashboard-header bg-white border-b border-gray-200 py-4 px-6">
+  <header
+    class="dashboard-header bg-white border-b border-gray-200 py-4 px-4 sm:px-6"
+  >
     <div class="flex items-center justify-between">
-      <!-- Left side: Breadcrumbs -->
-      <div class="flex items-center">
-        <slot name="breadcrumbs">
-          <ClientOnly>
-            <UBreadcrumb
-              v-if="validBreadcrumbs.length"
-              :links="validBreadcrumbs"
-              divider="i-heroicons-chevron-right-20-solid"
-            />
-          </ClientOnly>
-        </slot>
+      <!-- Left side: Mobile menu button and Breadcrumbs -->
+      <div class="flex items-center space-x-2">
+        <!-- Mobile menu button - only visible on mobile -->
+        <UButton
+          class="lg:hidden"
+          icon="i-heroicons-bars-3"
+          color="gray"
+          variant="ghost"
+          size="sm"
+          @click="toggleMobileMenu"
+          aria-label="Open menu"
+        />
+
+        <!-- Breadcrumbs - hidden on smallest screens -->
+        <div class="hidden sm:flex items-center">
+          <slot name="breadcrumbs">
+            <ClientOnly>
+              <UBreadcrumb
+                v-if="validBreadcrumbs.length"
+                :links="validBreadcrumbs"
+                divider="i-heroicons-chevron-right-20-solid"
+                :ui="{ wrapper: 'flex text-sm' }"
+              />
+            </ClientOnly>
+          </slot>
+        </div>
       </div>
 
       <!-- Right side: Actions -->
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2 sm:space-x-4">
         <slot name="actions">
           <!-- Default actions can go here -->
         </slot>
@@ -31,6 +48,10 @@ import type { BreadcrumbItem } from '../../types/navigation.types';
 
 const props = defineProps<{
   breadcrumbs?: BreadcrumbItem[];
+}>();
+
+const emit = defineEmits<{
+  (e: 'toggle-mobile-menu'): void;
 }>();
 
 const navigation = useNavigation();
@@ -54,6 +75,11 @@ const validBreadcrumbs = computed(() => {
     return [];
   }
 });
+
+// Toggle mobile menu
+const toggleMobileMenu = () => {
+  emit('toggle-mobile-menu');
+};
 </script>
 
 <style scoped>

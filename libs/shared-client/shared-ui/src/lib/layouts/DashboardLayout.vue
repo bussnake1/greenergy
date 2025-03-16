@@ -1,7 +1,9 @@
 <template>
   <div class="dashboard-layout flex">
+    <!-- Desktop sidebar -->
     <Aside
       v-model="sidebarCollapsed"
+      v-model:mobileModelValue="mobileMenuOpen"
       :items="navigationItems"
       class="dashboard-layout-aside"
     >
@@ -24,13 +26,17 @@
             :collapsed="sidebarCollapsed"
             :user="user"
             @logout="onLogout"
+            @menu-click="closeMobileMenu"
           />
         </slot>
       </template>
     </Aside>
 
     <div class="dashboard-layout-main flex-1 flex flex-col">
-      <DashboardHeader :breadcrumbs="breadcrumbs">
+      <DashboardHeader
+        :breadcrumbs="breadcrumbs"
+        @toggle-mobile-menu="toggleMobileMenu"
+      >
         <template #breadcrumbs>
           <slot name="breadcrumbs" />
         </template>
@@ -70,7 +76,9 @@ const emit = defineEmits<{
   (e: 'logout'): void;
 }>();
 
+// State
 const sidebarCollapsed = ref(false);
+const mobileMenuOpen = ref(false);
 const navigation = useNavigation(props.navigationItems || []);
 
 // Use provided breadcrumbs or auto-generated ones
@@ -92,6 +100,16 @@ const breadcrumbs = computed(() => {
     return [];
   }
 });
+
+// Toggle mobile menu
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+// Close mobile menu
+const closeMobileMenu = () => {
+  mobileMenuOpen.value = false;
+};
 
 // Handle logout
 const onLogout = () => {

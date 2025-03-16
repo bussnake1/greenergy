@@ -1,8 +1,13 @@
 <template>
-  <main class="dashboard-content p-6">
-    <div v-if="title || $slots.actions" class="mb-6">
-      <div class="flex items-center justify-between">
-        <h1 v-if="title" class="text-2xl font-semibold text-gray-900">
+  <main class="dashboard-content p-2 sm:p-6">
+    <div v-if="title || $slots.actions" class="mb-4 sm:mb-6">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4"
+      >
+        <h1
+          v-if="title"
+          class="text-xl sm:text-2xl font-semibold text-gray-900"
+        >
           {{ title }}
         </h1>
         <div v-if="$slots.actions" class="flex items-center space-x-2">
@@ -15,8 +20,9 @@
     </div>
 
     <div
-      class="dashboard-content-body"
-      :class="{ 'bg-white rounded-lg border border-gray-200 p-6': withCard }"
+      :class="{
+        'bg-white rounded-lg border border-gray-200 p-2 sm:p-6': withCard,
+      }"
     >
       <slot />
     </div>

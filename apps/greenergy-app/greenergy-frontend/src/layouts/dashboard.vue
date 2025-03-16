@@ -1,6 +1,6 @@
 <template>
   <DashboardLayout
-    app-name="Template App"
+    app-name="Greenergy App"
     :navigation-items="navigationItems"
     :user="user"
     @logout="logout"
@@ -41,20 +41,10 @@ const navigationItems = ref([
     to: '/dashboard',
     icon: 'i-heroicons-home',
   },
-  // {
-  //   label: 'API Keys',
-  //   to: '/dashboard/api-keys',
-  //   icon: 'i-heroicons-key',
-  // },
-  // {
-  //   label: 'Profile',
-  //   to: '/dashboard/profile',
-  //   icon: 'i-heroicons-user',
-  // },
-  // {
-  //   label: 'Settings',
-  //   to: '/dashboard/settings',
-  //   icon: 'i-heroicons-cog-6-tooth',
-  // },
+  {
+    label: 'Power Outages',
+    to: '/dashboard/power-outages',
+    icon: 'i-heroicons-bolt-slash',
+  },
 ]);
 </script>
