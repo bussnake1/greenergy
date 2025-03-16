@@ -16,7 +16,7 @@ async function bootstrap() {
 
   // Enable CORS for frontend
   app.enableCors({
-    origin: ['http://localhost:4200', 'https://greenergy-frontend.bussnake.hu'],
+    origin: ['http://localhost:4200', 'https://greenergy.bussnake.hu'],
     credentials: true,
   });
 
