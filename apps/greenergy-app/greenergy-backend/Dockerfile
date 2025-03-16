@@ -37,20 +37,24 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Install Prisma client and other dependencies needed for seeding
-RUN npm install @prisma/client fast-xml-parser
+RUN npm install @prisma/client fast-xml-parser ts-node tsconfig-paths
 
 # Copy Prisma schema for migrations
 COPY --from=builder /app/apps/greenergy-app/greenergy-backend/prisma ./prisma
 
+# Copy tsconfig and nx files for ts-node
+COPY --from=builder /app/tsconfig*.json ./
+COPY --from=builder /app/nx.json ./
+COPY --from=builder /app/apps/greenergy-app/greenergy-backend/tsconfig*.json ./apps/greenergy-app/greenergy-backend/
+
 # Copy the built application
 COPY --from=builder /app/dist/apps/greenergy-app/greenergy-backend ./dist
 
-# Copy assets directory for seeding
-COPY --from=builder /app/apps/greenergy-app/greenergy-backend/src/assets ./src/assets
+# Copy the entire src directory for seeding
+COPY --from=builder /app/apps/greenergy-app/greenergy-backend/src ./apps/greenergy-app/greenergy-backend/src
 
-# Copy scripts for seeding (both source and compiled)
-COPY --from=builder /app/apps/greenergy-app/greenergy-backend/src/scripts ./src/scripts
-COPY --from=builder /app/dist/apps/greenergy-app/greenergy-backend/scripts ./dist/scripts
+# Copy libs directory for shared code
+COPY --from=builder /app/libs ./libs
 
 # Copy startup script
 COPY --from=builder /app/apps/greenergy-app/greenergy-backend/start.sh ./start.sh
