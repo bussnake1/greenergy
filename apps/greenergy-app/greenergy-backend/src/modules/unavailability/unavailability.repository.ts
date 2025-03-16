@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { IUnavailabilityDAL, UnavailabilityFilter, UnavailabilityStats } from '@greenergy/production-generation-units-unavailability';
-import { TimeSeries } from '@prisma/client';
+import { IUnavailabilityDAL, UnavailabilityFilter, UnavailabilityStats, UnavailabilityPGTimeSeriesWithCapacity } from '@greenergy/production-generation-units-unavailability';
+import { UnavailabilityPGTimeSeries } from '@prisma/client';
 
 @Injectable()
 export class UnavailabilityRepository implements IUnavailabilityDAL {
@@ -10,10 +10,11 @@ export class UnavailabilityRepository implements IUnavailabilityDAL {
   /**
    * Find unavailabilities based on filter criteria
    */
-  async findUnavailabilities(filter: UnavailabilityFilter): Promise<TimeSeries[]> {
+  async findUnavailabilities(filter: UnavailabilityFilter): Promise<UnavailabilityPGTimeSeriesWithCapacity[]> {
     const { startDate, endDate, resourceName, resourceLocation } = filter;
     
-    return this.prisma.timeSeries.findMany({
+    // Fetch time series with their available periods and points
+    const timeSeries = await this.prisma.unavailabilityPGTimeSeries.findMany({
       where: {
         ...(startDate && { startTime: { gte: startDate } }),
         ...(endDate && { endTime: { lte: endDate } }),
@@ -21,56 +22,71 @@ export class UnavailabilityRepository implements IUnavailabilityDAL {
         ...(resourceLocation && { resourceLocation: { contains: resourceLocation, mode: 'insensitive' } }),
       },
       include: {
-        marketDocument: true,
+        unavailabilityPGMarketDocument: true,
+        unavailabilityPGAvailablePeriods: {
+          include: {
+            unavailabilityPGPoints: true,
+          },
+        },
       },
       orderBy: {
         startTime: 'asc',
       },
     });
+    
+    // Calculate capacity values for each item
+    return timeSeries.map(series => {
+      const { availableCapacity, unavailableCapacity } = this.calculateCapacityForItem(series);
+      return {
+        ...series,
+        availableCapacity,
+        unavailableCapacity,
+      };
+    });
   }
 
   /**
-   * Get statistics about unavailabilities
+   * Calculate capacity values for a single time series item
    */
-  async getUnavailabilityStats(filter: UnavailabilityFilter): Promise<UnavailabilityStats> {
-    const { startDate, endDate, resourceName, resourceLocation } = filter;
+  private calculateCapacityForItem(series: UnavailabilityPGTimeSeries): { 
+    availableCapacity: number; 
+    unavailableCapacity: number; 
+  } {
+    let availableCapacity = 0;
+    let unavailableCapacity = 0;
     
-    // Get all time series that match the filter
-    const timeSeries = await this.prisma.timeSeries.findMany({
-      where: {
-        ...(startDate && { startTime: { gte: startDate } }),
-        ...(endDate && { endTime: { lte: endDate } }),
-        ...(resourceName && { resourceName: { contains: resourceName, mode: 'insensitive' } }),
-        ...(resourceLocation && { resourceLocation: { contains: resourceLocation, mode: 'insensitive' } }),
-      },
-      include: {
-        availablePeriods: {
-          include: {
-            points: true,
-          },
-        },
-      },
-    });
+    if (series.nominalPower) {
+      // Get the value of the highest point of the available periods
+      const highestPoint = series.unavailabilityPGAvailablePeriods?.reduce((max, period) => {
+        return period.unavailabilityPGPoints.reduce((max, point) => {
+          return point.quantity > max ? point.quantity : max;
+        }, 0);
+      }, 0) || 0;
+
+      // Available capacity is the highest point
+      availableCapacity = highestPoint;
+      
+      // Unavailable capacity is the difference between nominal power and available capacity
+      unavailableCapacity = series.nominalPower - availableCapacity;
+    }
     
+    return {
+      availableCapacity,
+      unavailableCapacity,
+    };
+  }
+
+  /**
+   * Calculate statistics from a list of unavailabilities
+   */
+  private calculateStats(unavailabilityPGTimeSeries: UnavailabilityPGTimeSeries[]): UnavailabilityStats {
     // Calculate total unavailable capacity
     let totalUnavailableCapacity = 0;
     
-    for (const series of timeSeries) {
-      // If nominal power is available, use it
+    for (const series of unavailabilityPGTimeSeries) {
       if (series.nominalPower) {
-        // For each available period, check the points
-        for (const period of series.availablePeriods) {
-          for (const point of period.points) {
-            // If quantity is 0, the full capacity is unavailable
-            if (point.quantity === 0) {
-              totalUnavailableCapacity += series.nominalPower;
-            } 
-            // Otherwise, the unavailable capacity is the difference
-            else if (point.quantity < series.nominalPower) {
-              totalUnavailableCapacity += (series.nominalPower - point.quantity);
-            }
-          }
-        }
+        const { unavailableCapacity } = this.calculateCapacityForItem(series);
+        totalUnavailableCapacity += unavailableCapacity;
       }
     }
     
@@ -80,20 +96,47 @@ export class UnavailabilityRepository implements IUnavailabilityDAL {
   }
 
   /**
+   * Get statistics about unavailabilities
+   * This now accepts a parameter to determine whether to use grouped or ungrouped data
+   */
+  async getUnavailabilityStats(filter: UnavailabilityFilter, useGrouped = false): Promise<UnavailabilityStats> {
+    // Get the appropriate unavailabilities based on the useGrouped parameter
+    const unavailabilityPGTimeSeries = useGrouped 
+      ? await this.findGroupedUnavailabilities(filter)
+      : await this.findUnavailabilities(filter);
+    
+    // Make sure we include the necessary relation data for stats calculation
+    const unavailabilitiesWithPeriods = await this.prisma.unavailabilityPGTimeSeries.findMany({
+      where: {
+        id: { in: unavailabilityPGTimeSeries.map(item => item.id) }
+      },
+      include: {
+        unavailabilityPGAvailablePeriods: {
+          include: {
+            unavailabilityPGPoints: true,
+          },
+        },
+      },
+    });
+    
+    return this.calculateStats(unavailabilitiesWithPeriods);
+  }
+
+  /**
    * Find grouped unavailabilities based on rules
    * (e.g., filtering redundant records)
    */
-  async findGroupedUnavailabilities(filter: UnavailabilityFilter): Promise<TimeSeries[]> {
+  async findGroupedUnavailabilities(filter: UnavailabilityFilter): Promise<UnavailabilityPGTimeSeriesWithCapacity[]> {
     // Get all time series that match the filter
-    const allTimeSeries = await this.findUnavailabilities(filter);
+    const allUnavailabilityPGTimeSeries = await this.findUnavailabilities(filter);
     
     // Group by time periods and filter redundant records
-    const groupedTimeSeries: TimeSeries[] = [];
+    const groupedUnavailabilityPGTimeSeries: UnavailabilityPGTimeSeriesWithCapacity[] = [];
     const processedGroups = new Set<string>();
     
     // Example grouping rule: If there are multiple records for the same time period
     // and location, keep only the one with the highest nominal power
-    for (const series of allTimeSeries) {
+    for (const series of allUnavailabilityPGTimeSeries) {
       // Create a key for grouping (e.g., location + time period)
       const groupKey = `${series.resourceLocation || 'unknown'}_${series.startTime.toISOString()}_${series.endTime.toISOString()}`;
       
@@ -103,7 +146,7 @@ export class UnavailabilityRepository implements IUnavailabilityDAL {
       }
       
       // Find all series in the same group
-      const sameGroup = allTimeSeries.filter(s => 
+      const sameGroup = allUnavailabilityPGTimeSeries.filter(s => 
         (s.resourceLocation || 'unknown') === (series.resourceLocation || 'unknown') &&
         s.startTime.getTime() === series.startTime.getTime() &&
         s.endTime.getTime() === series.endTime.getTime()
@@ -117,16 +160,16 @@ export class UnavailabilityRepository implements IUnavailabilityDAL {
         );
         
         // Add the one with the highest nominal power
-        groupedTimeSeries.push(sameGroup[0]);
+        groupedUnavailabilityPGTimeSeries.push(sameGroup[0]);
       } else {
         // If there's only one, add it
-        groupedTimeSeries.push(series);
+        groupedUnavailabilityPGTimeSeries.push(series);
       }
       
       // Mark this group as processed
       processedGroups.add(groupKey);
     }
     
-    return groupedTimeSeries;
+    return groupedUnavailabilityPGTimeSeries;
   }
 }

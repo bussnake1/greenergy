@@ -19,8 +19,14 @@ export class UnavailabilityItemDto {
   @ApiProperty({ description: 'End time of unavailability' })
   endTime: Date;
 
-  @ApiProperty({ description: 'Nominal power in MAW', required: false })
+  @ApiProperty({ description: 'Nominal power in MW', required: false })
   nominalPower?: number;
+
+  @ApiProperty({ description: 'Available capacity in MW', required: false })
+  availableCapacity?: number;
+
+  @ApiProperty({ description: 'Unavailable capacity in MW', required: false })
+  unavailableCapacity?: number;
 
   @ApiProperty({ description: 'Business type (A53, A54, etc.)' })
   businessType: string;

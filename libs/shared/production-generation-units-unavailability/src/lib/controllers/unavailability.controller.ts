@@ -46,10 +46,18 @@ export class UnavailabilityController {
     description: 'Unavailability statistics', 
     type: UnavailabilityStatsDto 
   })
+  @ApiQuery({
+    name: 'useGrouped',
+    required: false,
+    type: Boolean,
+    description: 'Whether to use grouped unavailabilities for stats calculation'
+  })
   async getStats(
     @Query() filterDto: UnavailabilityFilterDto,
+    @Query('useGrouped') useGroupedParam?: string,
   ): Promise<UnavailabilityStatsDto> {
-    return this.unavailabilityService.getStats(filterDto);
+    const useGrouped = useGroupedParam === 'true';
+    return this.unavailabilityService.getStats(filterDto, useGrouped);
   }
 
   @Get('export/excel')
@@ -58,13 +66,23 @@ export class UnavailabilityController {
     status: 200, 
     description: 'Excel file with unavailabilities' 
   })
+  @ApiQuery({
+    name: 'useGrouped',
+    required: false,
+    type: Boolean,
+    description: 'Whether to use grouped unavailabilities'
+  })
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @Header('Content-Disposition', 'attachment; filename=unavailabilities.xlsx')
   async exportToExcel(
     @Query() filterDto: UnavailabilityFilterDto,
+    @Query('useGrouped') useGroupedParam?: string,
     @Res() res: Response,
   ): Promise<void> {
-    const data = await this.unavailabilityService.getUnavailabilities(filterDto);
+    const useGrouped = useGroupedParam === 'true';
+    const data = useGrouped 
+      ? await this.unavailabilityService.getGroupedUnavailabilities(filterDto)
+      : await this.unavailabilityService.getUnavailabilities(filterDto);
     
     // Create Excel workbook
     const workbook = new ExcelJS.Workbook();
@@ -77,7 +95,9 @@ export class UnavailabilityController {
       { header: 'Type', key: 'resourceType', width: 10 },
       { header: 'Start Time', key: 'startTime', width: 20 },
       { header: 'End Time', key: 'endTime', width: 20 },
-      { header: 'Nominal Power (MAW)', key: 'nominalPower', width: 15 },
+      { header: 'Nominal Power (MW)', key: 'nominalPower', width: 15 },
+      { header: 'Available Capacity (MW)', key: 'availableCapacity', width: 15 },
+      { header: 'Unavailable Capacity (MW)', key: 'unavailableCapacity', width: 15 },
       { header: 'Business Type', key: 'businessType', width: 15 },
       { header: 'Reason Code', key: 'reasonCode', width: 15 },
     ];
@@ -105,16 +125,26 @@ export class UnavailabilityController {
     status: 200, 
     description: 'CSV file with unavailabilities' 
   })
+  @ApiQuery({
+    name: 'useGrouped',
+    required: false,
+    type: Boolean,
+    description: 'Whether to use grouped unavailabilities'
+  })
   @Header('Content-Type', 'text/csv')
   @Header('Content-Disposition', 'attachment; filename=unavailabilities.csv')
   async exportToCsv(
     @Query() filterDto: UnavailabilityFilterDto,
+    @Query('useGrouped') useGroupedParam?: string,
     @Res() res: Response,
   ): Promise<void> {
-    const data = await this.unavailabilityService.getUnavailabilities(filterDto);
+    const useGrouped = useGroupedParam === 'true';
+    const data = useGrouped 
+      ? await this.unavailabilityService.getGroupedUnavailabilities(filterDto)
+      : await this.unavailabilityService.getUnavailabilities(filterDto);
     
     // Create CSV content
-    const headers = 'Resource Name,Location,Type,Start Time,End Time,Nominal Power (MAW),Business Type,Reason Code\n';
+    const headers = 'Resource Name,Location,Type,Start Time,End Time,Nominal Power (MW),Available Capacity (MW),Unavailable Capacity (MW),Business Type,Reason Code\n';
     
     const rows = data.items.map(item => {
       return [
@@ -124,6 +154,8 @@ export class UnavailabilityController {
         item.startTime.toISOString(),
         item.endTime.toISOString(),
         item.nominalPower || '',
+        item.availableCapacity || '',
+        item.unavailableCapacity || '',
         item.businessType,
         item.reasonCode || '',
       ].join(',');
