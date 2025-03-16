@@ -23,7 +23,7 @@ const parserOptions: ParserOptions = {
   ignoreAttributes: false,
   attributeNamePrefix: '_',
   isArray: (name: string) => {
-    return ['TimeSeries', 'Point', 'Available_Period'].includes(name);
+    return ['UnavailabilityPGTimeSeries', 'UnavailabilityPGPoint', 'Available_Period'].includes(name);
   },
   // Enhanced namespace handling
   ignoreNameSpace: false,
@@ -64,6 +64,33 @@ function getNestedProperty(obj: any, path: any) {
 }
 
 /**
+ * Helper function to safely extract values from the flattened XML structure
+ */
+function extractValue(obj: any, key: string, defaultValue: any = '') {
+  // Direct property access
+  if (obj[key] !== undefined) {
+    return obj[key];
+  }
+  
+  // For properties with attributes (with '#text' and '_codingScheme')
+  if (obj[key] && obj[key]['#text'] !== undefined) {
+    return obj[key]['#text'];
+  }
+  
+  return defaultValue;
+}
+
+/**
+ * Helper function to extract coding scheme and text value
+ */
+function extractWithCodingScheme(obj: any, key: string, defaultValue: string = '') {
+  if (obj[key] && obj[key]['#text'] !== undefined && obj[key]._codingScheme !== undefined) {
+    return `${obj[key]._codingScheme}:${obj[key]['#text']}`;
+  }
+  return extractValue(obj, key, defaultValue);
+}
+
+/**
  * Parse ISO date string to Date object
  */
 function parseISODate(dateString: any) {
@@ -85,7 +112,7 @@ async function processXmlFile(filePath: string) {
     console.log(`XML Structure for ${path.basename(filePath)}:`);
     console.log(inspectObject(result, 2));
     
-    // Extract the root element (Unavailability_MarketDocument)
+    // Extract the root element (MarketDocument)
     const doc = result.Unavailability_MarketDocument;
     
     if (!doc) {
@@ -95,7 +122,7 @@ async function processXmlFile(filePath: string) {
     
     // Debug: Log the document structure
     console.log('Document structure:');
-    console.log(inspectObject(doc, 2));
+    console.log(inspectObject(doc, 6));
     
     // Try multiple approaches to find the time interval
     let timeInterval = null;
@@ -136,8 +163,8 @@ async function processXmlFile(filePath: string) {
     
     console.log('Found time interval:', timeInterval);
     
-    // Create or update MarketDocument
-    const marketDocument = await prisma.marketDocument.upsert({
+    // Create or update UnavailabilityPGMarketDocument
+    const unavailabilityPGMarketDocument = await prisma.unavailabilityPGMarketDocument.upsert({
       where: { mRID: doc.mRID },
       update: {
         revisionNumber: parseInt(doc.revisionNumber),
@@ -160,111 +187,116 @@ async function processXmlFile(filePath: string) {
       },
     });
     
-    // Process TimeSeries
-    const timeSeriesArray = Array.isArray(doc.TimeSeries) 
+    // Process UnavailabilityPGTimeSeries
+    const unavailabilityPGTimeSeriesArray = Array.isArray(doc.TimeSeries) 
       ? doc.TimeSeries 
       : doc.TimeSeries ? [doc.TimeSeries] : [];
     
-    for (const ts of timeSeriesArray) {
-      // Debug: Log the TimeSeries object
-      console.log('TimeSeries object:', inspectObject(ts, 3));
+    for (const ts of unavailabilityPGTimeSeriesArray) {
+      // Debug: Log the UnavailabilityPGTimeSeries object
+      console.log('UnavailabilityPGTimeSeries object:', inspectObject(ts, 4));
       
       // Extract start and end times with more flexible approach
       let startDateTime = null;
       let endDateTime = null;
       
-      // Approach 1: Direct properties
-      if (ts.start_DateAndOrTime?.date && ts.start_DateAndOrTime?.time) {
-        startDateTime = parseISODate(`${ts.start_DateAndOrTime.date}T${ts.start_DateAndOrTime.time}`);
+      // Approach 1: Direct properties with flattened property names
+      if (ts['start_DateAndOrTime.date'] && ts['start_DateAndOrTime.time']) {
+        startDateTime = parseISODate(`${ts['start_DateAndOrTime.date']}T${ts['start_DateAndOrTime.time']}`);
       }
       
-      if (ts.end_DateAndOrTime?.date && ts.end_DateAndOrTime?.time) {
-        endDateTime = parseISODate(`${ts.end_DateAndOrTime.date}T${ts.end_DateAndOrTime.time}`);
+      if (ts['end_DateAndOrTime.date'] && ts['end_DateAndOrTime.time']) {
+        endDateTime = parseISODate(`${ts['end_DateAndOrTime.date']}T${ts['end_DateAndOrTime.time']}`);
       }
       
       // Approach 2: If we have the document time interval, use that as fallback
       if (!startDateTime && timeInterval?.start) {
         startDateTime = parseISODate(timeInterval.start);
-        console.log(`Using document time interval start for TimeSeries ${ts.mRID}`);
+        console.log(`Using document time interval start for UnavailabilityPGTimeSeries ${ts.mRID}`);
       }
       
       if (!endDateTime && timeInterval?.end) {
         endDateTime = parseISODate(timeInterval.end);
-        console.log(`Using document time interval end for TimeSeries ${ts.mRID}`);
+        console.log(`Using document time interval end for UnavailabilityPGTimeSeries ${ts.mRID}`);
       }
       
       if (!startDateTime || !endDateTime) {
-        console.warn(`Missing start or end time in TimeSeries ${ts.mRID} - skipping`);
+        console.warn(`Missing start or end time in UnavailabilityPGTimeSeries ${ts.mRID} - skipping`);
         continue;
       }
       
-      console.log(`TimeSeries ${ts.mRID} time range: ${startDateTime.toISOString()} - ${endDateTime.toISOString()}`);
+      console.log(`UnavailabilityPGTimeSeries ${ts.mRID} time range: ${startDateTime.toISOString()} - ${endDateTime.toISOString()}`);
       
-      // Create TimeSeries record
-      const timeSeries = await prisma.timeSeries.create({
+      // Create UnavailabilityPGTimeSeries record
+      const unavailabilityPGTimeSeries = await prisma.unavailabilityPGTimeSeries.create({
         data: {
           mRID: String(ts.mRID), // Convert mRID to string
-          businessType: ts.businessType,
-          biddingZone: ts.biddingZone_Domain?.mRID?._codingScheme 
-            ? `${ts.biddingZone_Domain.mRID._codingScheme}:${ts.biddingZone_Domain.mRID['#text']}` 
-            : ts.biddingZone_Domain?.mRID || '',
+          businessType: extractValue(ts, 'businessType'),
+          biddingZone: extractWithCodingScheme(ts, 'biddingZone_Domain.mRID'),
           startTime: startDateTime,
           endTime: endDateTime,
-          quantityUnit: ts.quantity_Measure_Unit?.name || 'MAW',
-          curveType: ts.curveType,
-          resourceMRID: ts.production_RegisteredResource?.mRID?._codingScheme 
-            ? `${ts.production_RegisteredResource.mRID._codingScheme}:${ts.production_RegisteredResource.mRID['#text']}` 
-            : ts.production_RegisteredResource?.mRID || '',
-          resourceName: ts.production_RegisteredResource?.name || '',
-          resourceLocation: ts.production_RegisteredResource?.location?.name,
-          resourceType: ts.production_RegisteredResource?.pSRType?.psrType,
-          powerSystemMRID: ts.production_RegisteredResource?.pSRType?.powerSystemResources?.mRID?._codingScheme 
-            ? `${ts.production_RegisteredResource.pSRType.powerSystemResources.mRID._codingScheme}:${ts.production_RegisteredResource.pSRType.powerSystemResources.mRID['#text']}` 
-            : ts.production_RegisteredResource?.pSRType?.powerSystemResources?.mRID,
-          powerSystemName: ts.production_RegisteredResource?.pSRType?.powerSystemResources?.name,
-          nominalPower: ts.production_RegisteredResource?.pSRType?.powerSystemResources?.nominalP?._unit 
-            ? parseFloat(ts.production_RegisteredResource.pSRType.powerSystemResources.nominalP['#text']) 
-            : ts.production_RegisteredResource?.pSRType?.powerSystemResources?.nominalP 
-              ? parseFloat(ts.production_RegisteredResource.pSRType.powerSystemResources.nominalP) 
-              : null,
-          nominalPowerUnit: ts.production_RegisteredResource?.pSRType?.powerSystemResources?.nominalP?._unit || 'MAW',
-          marketDocumentId: marketDocument.id,
+          quantityUnit: extractValue(ts, 'quantity_Measure_Unit.name', 'MAW'),
+          curveType: extractValue(ts, 'curveType'),
+          resourceMRID: extractWithCodingScheme(ts, 'production_RegisteredResource.mRID'),
+          resourceName: extractValue(ts, 'production_RegisteredResource.name'),
+          resourceLocation: extractValue(ts, 'production_RegisteredResource.location.name'),
+          resourceType: extractValue(ts, 'production_RegisteredResource.pSRType.psrType'),
+          powerSystemMRID: extractWithCodingScheme(ts, 'production_RegisteredResource.pSRType.powerSystemResources.mRID'),
+          powerSystemName: extractValue(ts, 'production_RegisteredResource.pSRType.powerSystemResources.name'),
+          nominalPower: (() => {
+            const nominalP = ts['production_RegisteredResource.pSRType.powerSystemResources.nominalP'];
+            if (!nominalP) return null;
+            
+            // Handle case where nominalP has unit attribute and text value
+            if (nominalP['#text'] !== undefined) {
+              return parseFloat(nominalP['#text']);
+            }
+            
+            // Handle case where nominalP is just a number
+            return typeof nominalP === 'number' ? nominalP : 
+                   typeof nominalP === 'string' ? parseFloat(nominalP) : null;
+          })(),
+          nominalPowerUnit: (() => {
+            const nominalP = ts['production_RegisteredResource.pSRType.powerSystemResources.nominalP'];
+            return nominalP && nominalP._unit ? nominalP._unit : 'MAW';
+          })(),
+          unavailabilityPGMarketDocumentId: unavailabilityPGMarketDocument.id,
         },
       });
       
       // Process Available_Period
-      const availablePeriods = Array.isArray(ts.Available_Period) 
+      const unavailabilityPGAvailablePeriods = Array.isArray(ts.Available_Period) 
         ? ts.Available_Period 
         : ts.Available_Period ? [ts.Available_Period] : [];
       
-      for (const period of availablePeriods) {
+      for (const period of unavailabilityPGAvailablePeriods) {
         if (!period.timeInterval?.start || !period.timeInterval?.end) {
           console.warn(`Missing time interval in Available_Period`);
           continue;
         }
         
-        // Create AvailablePeriod record
-        const availablePeriod = await prisma.availablePeriod.create({
+        // Create UnavailabilityPGAvailablePeriod record
+        const unavailabilityPGAvailablePeriod = await prisma.unavailabilityPGAvailablePeriod.create({
           data: {
             startTime: parseISODate(period.timeInterval.start),
             endTime: parseISODate(period.timeInterval.end),
             resolution: period.resolution,
-            timeSeriesId: timeSeries.id,
+            unavailabilityPGTimeSeriesId: unavailabilityPGTimeSeries.id,
           },
         });
         
-        // Process Point
-        const points = Array.isArray(period.Point) 
+        // Process UnavailabilityPGPoint
+        const unavailabilityPGPoints = Array.isArray(period.Point) 
           ? period.Point 
           : period.Point ? [period.Point] : [];
         
-        for (const point of points) {
-          // Create Point record
-          await prisma.point.create({
+        for (const unavailabilityPGPoint of unavailabilityPGPoints) {
+          // Create UnavailabilityPGPoint record
+          await prisma.unavailabilityPGPoint.create({
             data: {
-              position: parseInt(point.position),
-              quantity: parseFloat(point.quantity),
-              availablePeriodId: availablePeriod.id,
+              position: parseInt(unavailabilityPGPoint.position),
+              quantity: parseFloat(unavailabilityPGPoint.quantity),
+              unavailabilityPGAvailablePeriodId: unavailabilityPGAvailablePeriod.id,
             },
           });
         }
@@ -285,15 +317,15 @@ async function seedDatabase() {
   
   try {
     // Check if database is already seeded
-    const existingDocuments = await prisma.marketDocument.count();
+    const existingDocuments = await prisma.unavailabilityPGMarketDocument.count();
     
     if (existingDocuments > 0) {
       console.log('Database already contains market documents. Clearing existing data...');
       // Delete all existing data in reverse order of dependencies
-      await prisma.point.deleteMany({});
-      await prisma.availablePeriod.deleteMany({});
-      await prisma.timeSeries.deleteMany({});
-      await prisma.marketDocument.deleteMany({});
+      await prisma.unavailabilityPGPoint.deleteMany({});
+      await prisma.unavailabilityPGAvailablePeriod.deleteMany({});
+      await prisma.unavailabilityPGTimeSeries.deleteMany({});
+      await prisma.unavailabilityPGMarketDocument.deleteMany({});
       console.log('Existing data cleared. Proceeding with seeding...');
     }
     

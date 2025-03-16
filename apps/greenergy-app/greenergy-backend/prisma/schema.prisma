@@ -14,70 +14,70 @@ datasource db {
 }
 
 // Power Plant Outage Models
-model MarketDocument {
-  id             String       @id @default(uuid())
-  mRID           String       @unique // Document ID from XML
-  revisionNumber Int // Revision number
-  type           String // Document type (A77, A80, etc.)
-  processType    String // process.processType
-  createdAt      DateTime // createdDateTime from the document
-  startTime      DateTime // unavailability_Time_Period.timeInterval start
-  endTime        DateTime // unavailability_Time_Period.timeInterval end
-  reasonCode     String? // Reason code (B18, B19, etc.)
-  timeSeries     TimeSeries[]
+model UnavailabilityPGMarketDocument {
+  id                         String                       @id @default(uuid())
+  mRID                       String                       @unique // Document ID from XML
+  revisionNumber             Int // Revision number
+  type                       String // Document type (A77, A80, etc.)
+  processType                String // process.processType
+  createdAt                  DateTime // createdDateTime from the document
+  startTime                  DateTime // unavailability_Time_Period.timeInterval start
+  endTime                    DateTime // unavailability_Time_Period.timeInterval end
+  reasonCode                 String? // Reason code (B18, B19, etc.)
+  unavailabilityPGTimeSeries UnavailabilityPGTimeSeries[]
 
   @@index([startTime, endTime])
-  @@map("market_documents")
+  @@map("unavailability_pg_market_documents")
 }
 
-model TimeSeries {
-  id               String            @id @default(uuid())
-  mRID             String // TimeSeries mRID
-  businessType     String // businessType (A53, A54, etc.)
-  biddingZone      String // biddingZone_Domain.mRID
-  startTime        DateTime // start_DateAndOrTime (combined date and time)
-  endTime          DateTime // end_DateAndOrTime (combined date and time)
-  quantityUnit     String // quantity_Measure_Unit.name (MAW)
-  curveType        String // curveType
-  resourceMRID     String // production_RegisteredResource.mRID
-  resourceName     String // production_RegisteredResource.name
-  resourceLocation String? // production_RegisteredResource.location.name
-  resourceType     String? // production_RegisteredResource.pSRType.psrType
-  powerSystemMRID  String? // production_RegisteredResource.pSRType.powerSystemResources.mRID
-  powerSystemName  String? // production_RegisteredResource.pSRType.powerSystemResources.name
-  nominalPower     Float? // production_RegisteredResource.pSRType.powerSystemResources.nominalP
-  nominalPowerUnit String? // Unit for nominalPower (usually MAW)
-  marketDocumentId String            @map("market_document_id")
-  marketDocument   MarketDocument    @relation(fields: [marketDocumentId], references: [id], onDelete: Cascade)
-  availablePeriods AvailablePeriod[]
+model UnavailabilityPGTimeSeries {
+  id                               String                            @id @default(uuid())
+  mRID                             String // UnavailabilityPGTimeSeries mRID
+  businessType                     String // businessType (A53, A54, etc.)
+  biddingZone                      String // biddingZone_Domain.mRID
+  startTime                        DateTime // start_DateAndOrTime (combined date and time)
+  endTime                          DateTime // end_DateAndOrTime (combined date and time)
+  quantityUnit                     String // quantity_Measure_Unit.name (MAW)
+  curveType                        String // curveType
+  resourceMRID                     String // production_RegisteredResource.mRID
+  resourceName                     String // production_RegisteredResource.name
+  resourceLocation                 String? // production_RegisteredResource.location.name
+  resourceType                     String? // production_RegisteredResource.pSRType.psrType
+  powerSystemMRID                  String? // production_RegisteredResource.pSRType.powerSystemResources.mRID
+  powerSystemName                  String? // production_RegisteredResource.pSRType.powerSystemResources.name
+  nominalPower                     Float? // production_RegisteredResource.pSRType.powerSystemResources.nominalP
+  nominalPowerUnit                 String? // Unit for nominalPower (usually MAW)
+  unavailabilityPGMarketDocumentId String                            @map("unavailability_pg_market_document_id")
+  unavailabilityPGMarketDocument   UnavailabilityPGMarketDocument    @relation(fields: [unavailabilityPGMarketDocumentId], references: [id], onDelete: Cascade)
+  unavailabilityPGAvailablePeriods UnavailabilityPGAvailablePeriod[]
 
   @@index([startTime, endTime])
   @@index([resourceName])
   @@index([resourceLocation])
-  @@map("time_series")
+  @@map("unavailability_pg_time_series")
 }
 
-model AvailablePeriod {
-  id           String     @id @default(uuid())
-  startTime    DateTime // timeInterval start
-  endTime      DateTime // timeInterval end
-  resolution   String // resolution (PT15M, PT1M, etc.)
-  timeSeriesId String     @map("time_series_id")
-  timeSeries   TimeSeries @relation(fields: [timeSeriesId], references: [id], onDelete: Cascade)
-  points       Point[]
+model UnavailabilityPGAvailablePeriod {
+  id                           String                     @id @default(uuid())
+  startTime                    DateTime // timeInterval start
+  endTime                      DateTime // timeInterval end
+  resolution                   String // resolution (PT15M, PT1M, etc.)
+  unavailabilityPGTimeSeriesId String                     @map("unavailability_pg_time_series_id")
+  unavailabilityPGTimeSeries   UnavailabilityPGTimeSeries @relation(fields: [unavailabilityPGTimeSeriesId], references: [id], onDelete: Cascade)
+  unavailabilityPGPoints       UnavailabilityPGPoint[]
 
   @@index([startTime, endTime])
-  @@map("available_periods")
+  @@map("unavailability_pg_available_periods")
 }
 
-model Point {
-  id                String          @id @default(uuid())
-  position          Int // position
-  quantity          Float // quantity (available capacity in MAW)
-  availablePeriodId String          @map("available_period_id")
-  availablePeriod   AvailablePeriod @relation(fields: [availablePeriodId], references: [id], onDelete: Cascade)
+model UnavailabilityPGPoint {
+  id                                String                          @id @default(uuid())
+  position                          Int // position
+  quantity                          Float // quantity (available capacity in MAW)
+  unavailabilityPGAvailablePeriodId String                          @map("unavailability_pg_available_period_id")
+  unavailabilityPGAvailablePeriod   UnavailabilityPGAvailablePeriod @relation(fields: [unavailabilityPGAvailablePeriodId], references: [id], onDelete: Cascade)
 
-  @@map("points")
+  @@map("unavailability_pg_points")
 }
 
 model User {
