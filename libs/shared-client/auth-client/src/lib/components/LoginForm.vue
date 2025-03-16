@@ -79,9 +79,12 @@ const validate = (state: LoginCredentials) => {
 
 const handleSubmit = async () => {
   try {
+    // The useAuth composable now handles clearing tokens before login,
+    // which prevents issues with expired tokens
     await login(form);
   } catch (err) {
-    // Error is handled by useAuth composable
+    // Error is already handled by useAuth composable
+    console.error('Login error:', err);
   }
 };
 </script>

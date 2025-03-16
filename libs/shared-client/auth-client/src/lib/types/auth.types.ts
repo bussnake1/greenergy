@@ -13,9 +13,15 @@ export interface RegisterData extends LoginCredentials {
   username: string;
 }
 
+export interface TokenResponse {
+  access_token: string;
+  refresh_token?: string;
+}
+
 export interface AuthResponse {
   user: User;
   access_token: string;
+  refresh_token: string;
 }
 
 export interface AuthState {

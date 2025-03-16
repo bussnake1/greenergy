@@ -66,7 +66,38 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email, username: user.username };
     return {
       user,
-      access_token: await this.jwtAuthService.generateToken(payload),
+      access_token: await this.jwtAuthService.generateAccessToken(payload),
+      refresh_token: await this.jwtAuthService.generateRefreshToken(payload),
     };
+  }
+
+  async refreshToken(refreshToken: string) {
+    try {
+      // Verify the refresh token is valid
+      const payload = await this.jwtAuthService.verifyRefreshToken(refreshToken);
+      
+      // Find the user to ensure they still exist and are active
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub }
+      });
+      
+      if (!user) {
+        throw new UnauthorizedException('User no longer exists');
+      }
+      
+      // Generate a new access token
+      const newPayload = { sub: user.id, email: user.email, username: user.username };
+      const access_token = await this.jwtAuthService.generateAccessToken(newPayload);
+      
+      // Optionally, you could issue a new refresh token too
+      // const refresh_token = await this.jwtAuthService.generateRefreshToken(newPayload);
+      
+      return {
+        access_token,
+        // refresh_token, // Uncomment if you want to issue a new refresh token
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 }

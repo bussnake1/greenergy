@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, OnModuleInit, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Logger, OnModuleInit, Post, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from 'shared/auth';
 import type { Request } from 'express';
@@ -10,6 +10,10 @@ export class LoginDto {
 
 export class RegisterDto extends LoginDto {
   username: string;
+}
+
+export class RefreshTokenDto {
+  refresh_token: string;
 }
 
 interface RequestWithUser extends Request {
@@ -32,8 +36,27 @@ export class AuthController implements OnModuleInit {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    const user = await this.authService.validateUser(loginDto.email, loginDto.password);
-    return this.authService.login(user);
+    try {
+      const user = await this.authService.validateUser(loginDto.email, loginDto.password);
+      return this.authService.login(user);
+    } catch (error) {
+      this.logger.error(`Login failed: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  @Post('refresh')
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    try {
+      if (!refreshTokenDto.refresh_token) {
+        throw new UnauthorizedException('Refresh token is required');
+      }
+      
+      return await this.authService.refreshToken(refreshTokenDto.refresh_token);
+    } catch (error) {
+      this.logger.error(`Token refresh failed: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Post('register')

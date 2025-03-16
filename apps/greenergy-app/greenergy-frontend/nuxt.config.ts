@@ -10,6 +10,10 @@ export default defineNuxtConfig({
   buildDir: '../../../dist/apps/greenergy-app/greenergy-frontend/.nuxt',
   devtools: { enabled: true },
   modules: ['@nuxt/ui'],
+  plugins: [
+    { src: "~/plugins/apexcharts.client.ts", mode: "client" },
+    { src: "~/plugins/auth.ts", mode: "client" }
+  ],
   colorMode: {
     preference: 'light'
   },
@@ -48,8 +52,9 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     apiBaseUrl: 'http://localhost:3333/api',
-    // public: {
-    // }
+    public: {
+      apiBaseUrl: 'http://localhost:3333/api'
+    }
   },
 
   nitro: {

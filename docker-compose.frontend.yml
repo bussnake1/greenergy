@@ -14,6 +14,7 @@ services:
       - HOST=0.0.0.0
       - PORT=3000
       - NUXT_API_BASE_URL=https://${BACKEND_DOMAIN:-http://localhost:3333}/api
+      - NUXT_PUBLIC_API_BASE_URL=https://${BACKEND_DOMAIN:-http://localhost:3333}/api
       # Ensure the frontend can find the backend service if needed
     networks:
       - dokploy-network
