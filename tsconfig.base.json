@@ -26,6 +26,8 @@
     "paths": {
       "@greenergy/auth-client": ["libs/shared-client/auth-client/src"],
       "@greenergy/auth-client/*": ["libs/shared-client/auth-client/src/*"],
+      "@greenergy/outage-client": ["libs/shared-client/outage-client/src"],
+      "@greenergy/outage-client/*": ["libs/shared-client/outage-client/src/*"],
       "@greenergy/production-generation-units-unavailability": [
         "libs/shared/production-generation-units-unavailability/src"
       ],

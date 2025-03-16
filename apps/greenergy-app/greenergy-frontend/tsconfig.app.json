@@ -18,5 +18,9 @@
     "../../../libs/shared-client/*/src/**/*"
   ],
   "exclude": ["out-tsc", "dist"],
-  "references": []
+  "references": [
+    {
+      "path": "../../../libs/shared-client/outage-client/tsconfig.lib.json"
+    }
+  ]
 }

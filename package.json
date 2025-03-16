@@ -12,14 +12,19 @@
     "@nestjs/platform-express": "^11.0.10",
     "@nestjs/swagger": "^11.0.6",
     "@nx/nest": "^21.0.0-canary.20250206-8bd0bcd",
+    "apexcharts": "^4.5.0",
     "bcrypt": "^5.1.1",
     "class-validator": "^0.14.1",
+    "date-fns": "^2.30.0",
     "exceljs": "^4.4.0",
     "fast-xml-parser": "^5.0.8",
+    "lodash-es": "^4.17.21",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "path-to-regexp": "^8.2.0",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "v-calendar": "^3.1.2",
+    "vue3-apexcharts": "^1.8.0"
   },
   "devDependencies": {
     "@nestjs/schematics": "^10.0.1",
@@ -42,6 +47,7 @@
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
     "@types/bcrypt": "^5.0.2",
+    "@types/lodash-es": "^4.17.12",
     "@types/passport-jwt": "^4.0.1",
     "@vitejs/plugin-vue": "^4.5.0",
     "@vue/test-utils": "^2.4.1",

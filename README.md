@@ -9,3 +9,9 @@
 7. Open new terminal and run `npx nx run greenergy-frontend:serve` to start the frontend
 8. Open http://localhost:4200/register to register a user
 9. /dashboard to check the dashboard
+
+# TODO:
+
+cleanup backend shared lib:
+
+- remove prisma types from shared lib - use dtos instead
