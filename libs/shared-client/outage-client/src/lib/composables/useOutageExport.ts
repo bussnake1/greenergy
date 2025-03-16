@@ -1,6 +1,6 @@
 import { ref, Ref } from 'vue';
 import { OutageFilters } from '../types';
-import { useCookie } from '#app';
+import { useCookie } from 'nuxt/app';
 
 export function useOutageExport() {
   const loading: Ref<boolean> = ref(false);
