@@ -36,14 +36,21 @@ COPY package*.json ./
 # Install production dependencies only
 RUN npm ci --only=production
 
-# Install Prisma client explicitly
-RUN npm install @prisma/client
+# Install Prisma client and other dependencies needed for seeding
+RUN npm install @prisma/client fast-xml-parser
 
 # Copy Prisma schema for migrations
 COPY --from=builder /app/apps/greenergy-app/greenergy-backend/prisma ./prisma
 
 # Copy the built application
 COPY --from=builder /app/dist/apps/greenergy-app/greenergy-backend ./dist
+
+# Copy assets directory for seeding
+COPY --from=builder /app/apps/greenergy-app/greenergy-backend/src/assets ./src/assets
+
+# Copy scripts for seeding (both source and compiled)
+COPY --from=builder /app/apps/greenergy-app/greenergy-backend/src/scripts ./src/scripts
+COPY --from=builder /app/dist/apps/greenergy-app/greenergy-backend/scripts ./dist/scripts
 
 # Copy startup script
 COPY --from=builder /app/apps/greenergy-app/greenergy-backend/start.sh ./start.sh

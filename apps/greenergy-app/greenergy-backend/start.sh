@@ -8,7 +8,7 @@ echo "🔄 Generating Prisma client..."
 npx prisma generate
 
 echo "🌱 Seeding the database..."
-npx nx run greenergy-backend:seed
+node dist/scripts/run-seeder.js
 
 echo "🚀 Starting NestJS application..."
 exec node dist/main.js
