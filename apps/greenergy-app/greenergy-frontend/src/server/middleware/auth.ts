@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
       event.context.user = userData;
       
       // Log success for debugging
-      console.log('Server auth middleware: User authenticated');
+      // console.log('Server auth middleware: User authenticated');
     } catch (error) {
       // Token validation failed, but we don't redirect here
       // We just don't set the user in context
