@@ -23,7 +23,7 @@ ENV NX_DAEMON=false
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 # Build the application
-RUN npx nx build greenergy-frontend --prod
+RUN npx nx build greenergy-frontend --prod --skip-nx-cache
 
 # Debug: List the build output to see the structure
 RUN ls -la /app/dist/apps/greenergy-app/greenergy-frontend
